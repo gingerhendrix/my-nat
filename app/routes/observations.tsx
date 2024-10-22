@@ -59,15 +59,41 @@ export default function ObservationsPage() {
         <div className="space-y-4">
           {observations.map((obs) => (
             <div key={obs.id} className="border rounded-lg p-4">
-              <h2 className="text-xl font-semibold">{obs.species_guess}</h2>
-              <p className="text-gray-600">Observed on: {obs.observed_on}</p>
-              <p className="text-gray-600">Location: {obs.place_guess}</p>
-              {obs.photos.length > 0 && obs.photos[0].url && (
-                <img 
-                  src={obs.photos[0].thumbnail_url || obs.photos[0].url} 
-                  alt={obs.species_guess}
-                  className="mt-2 rounded-lg"
-                />
+              <div className="flex gap-4">
+                {obs.photos.length > 0 && (
+                  <div className="flex-shrink-0">
+                    <img 
+                      src={obs.photos[0].medium_url} 
+                      alt={obs.species_guess}
+                      className="w-48 h-48 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
+                <div>
+                  <h2 className="text-xl font-semibold">{obs.species_guess}</h2>
+                  <p className="text-gray-600">Observed on: {obs.observed_on}</p>
+                  <p className="text-gray-600">Location: {obs.place_guess}</p>
+                  {obs.description && (
+                    <p className="text-gray-700 mt-2">{obs.description}</p>
+                  )}
+                  {obs.photos.length > 0 && (
+                    <p className="text-sm text-gray-500 mt-2">
+                      Photo: {obs.photos[0].attribution}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {obs.photos.length > 1 && (
+                <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+                  {obs.photos.slice(1).map((photo) => (
+                    <img
+                      key={photo.id}
+                      src={photo.small_url}
+                      alt={obs.species_guess}
+                      className="h-24 w-24 object-cover rounded-lg flex-shrink-0"
+                    />
+                  ))}
+                </div>
               )}
             </div>
           ))}

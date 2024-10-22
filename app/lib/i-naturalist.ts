@@ -1,3 +1,14 @@
+export interface INatPhoto {
+  id: number;
+  attribution: string;
+  license_code: string;
+  square_url: string;
+  thumb_url: string;
+  small_url: string;
+  medium_url: string;
+  large_url: string;
+}
+
 export interface INatObservation {
   id: number;
   species_guess: string;
@@ -8,10 +19,7 @@ export interface INatObservation {
   latitude?: number;
   longitude?: number;
   quality_grade: string;
-  photos: Array<{
-    url?: string;
-    thumbnail_url?: string;
-  }>;
+  photos: INatPhoto[];
 }
 
 const BASE_URL = 'https://www.inaturalist.org';
