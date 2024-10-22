@@ -84,6 +84,8 @@ export async function fetchObservations(params: SearchParams): Promise<SearchRes
   const searchParams = new URLSearchParams();
   searchParams.append('per_page', PER_PAGE.toString());
   searchParams.append('page', (params.page || 1).toString());
+  searchParams.append('order', 'desc');
+  searchParams.append('order_by', 'observed_on');
   
   if (params.boundingBox) {
     searchParams.append('swlat', params.boundingBox.swlat.toString());
@@ -110,26 +112,22 @@ export async function fetchObservations(params: SearchParams): Promise<SearchRes
   const totalCount = Number(response.headers.get('X-Total-Entries') || 0);
   let observations = await response.json();
 
-  // Calculate distances if search location is provided
+  // Add distance information if search location is provided
   if (params.searchLocation) {
-    observations = observations
-      .map((obs: INatObservation) => {
-        if (obs.latitude && obs.longitude) {
-          return {
-            ...obs,
-            distanceMeters: calculateDistance(
-              params.searchLocation!.lat,
-              params.searchLocation!.lng,
-              obs.latitude,
-              obs.longitude
-            )
-          };
-        }
-        return obs;
-      })
-      .sort((a: INatObservation, b: INatObservation) => 
-        (a.distanceMeters || Infinity) - (b.distanceMeters || Infinity)
-      );
+    observations = observations.map((obs: INatObservation) => {
+      if (obs.latitude && obs.longitude) {
+        return {
+          ...obs,
+          distanceMeters: calculateDistance(
+            params.searchLocation!.lat,
+            params.searchLocation!.lng,
+            obs.latitude,
+            obs.longitude
+          )
+        };
+      }
+      return obs;
+    });
   }
 
   return {
