@@ -54,10 +54,6 @@ export interface SearchParams {
 export async function fetchObservations(params: SearchParams): Promise<INatObservation[]> {
   const searchParams = new URLSearchParams();
   
-  if (params.username) {
-    searchParams.append('user_login', params.username);
-  }
-  
   if (params.boundingBox) {
     searchParams.append('swlat', params.boundingBox.swlat.toString());
     searchParams.append('swlng', params.boundingBox.swlng.toString());
@@ -65,7 +61,12 @@ export async function fetchObservations(params: SearchParams): Promise<INatObser
     searchParams.append('nelng', params.boundingBox.nelng.toString());
   }
 
-  const url = `${BASE_URL}/observations.json${
+  // Construct the URL based on whether we have a username
+  const endpoint = params.username 
+    ? `/observations/${params.username}.json` 
+    : '/observations.json';
+    
+  const url = `${BASE_URL}${endpoint}${
     searchParams.toString() ? `?${searchParams.toString()}` : ''
   }`;
   
