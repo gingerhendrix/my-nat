@@ -1,4 +1,4 @@
-app = "my-nat-adf8"
+app = "my-nat"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = [ ]
