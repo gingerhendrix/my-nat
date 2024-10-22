@@ -22,16 +22,63 @@ export interface INatObservation {
   photos: INatPhoto[];
 }
 
+export interface BoundingBox {
+  swlat: number;
+  swlng: number;
+  nelat: number;
+  nelng: number;
+}
+
 const BASE_URL = 'https://www.inaturalist.org';
 
-export async function fetchUserObservations(username: string): Promise<INatObservation[]> {
-  const response = await fetch(
-    `${BASE_URL}/observations/${username}.json`
-  );
+// Convert center point and radius to bounding box
+export function calculateBoundingBox(lat: number, lng: number, radiusMeters: number): BoundingBox {
+  // Rough approximation: 1 degree of latitude = 111,111 meters
+  const latDelta = (radiusMeters / 111111);
+  // Longitude degrees per meter varies with latitude
+  const lngDelta = (radiusMeters / (111111 * Math.cos(lat * Math.PI / 180)));
+
+  return {
+    swlat: lat - latDelta,
+    swlng: lng - lngDelta,
+    nelat: lat + latDelta,
+    nelng: lng + lngDelta
+  };
+}
+
+export interface SearchParams {
+  username?: string;
+  boundingBox?: BoundingBox;
+}
+
+export async function fetchObservations(params: SearchParams): Promise<INatObservation[]> {
+  const searchParams = new URLSearchParams();
+  
+  if (params.username) {
+    searchParams.append('user_login', params.username);
+  }
+  
+  if (params.boundingBox) {
+    searchParams.append('swlat', params.boundingBox.swlat.toString());
+    searchParams.append('swlng', params.boundingBox.swlng.toString());
+    searchParams.append('nelat', params.boundingBox.nelat.toString());
+    searchParams.append('nelng', params.boundingBox.nelng.toString());
+  }
+
+  const url = `${BASE_URL}/observations.json${
+    searchParams.toString() ? `?${searchParams.toString()}` : ''
+  }`;
+  
+  const response = await fetch(url);
   
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   
   return response.json();
+}
+
+// Keeping this for backward compatibility
+export async function fetchUserObservations(username: string): Promise<INatObservation[]> {
+  return fetchObservations({ username });
 }
